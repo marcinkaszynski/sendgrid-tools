@@ -99,7 +99,7 @@ class EventDispatcher(object):
             uploader.run()
 
     def get_uploader_name(self, event):
-        return event.get('unique_args', {}).get('deployment', 'DEFAULT')
+        return event.get('unique_args', {}).get('deployment', 'default')
 
 
 class EventHandler(Resource):
