@@ -9,6 +9,11 @@ SendGrid Event API lets you specify only a single webhook for every
 user or subuser.  Scripts in this repo make it possible to use a
 single URL (a single SG user) for multiple deployments.
 
+Requirements:
+
+ * Python (tested on 2.7, might work on lower versions)
+ * Twisted
+
 Reposter
 ========
 

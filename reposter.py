@@ -9,17 +9,17 @@ Usage:
 2. Customize the REPOSTER_PORT, make sure it's open to the outside
    world, set it up as Event webhook URL in the SendGrid panel.
 
-3. Put the list of your deployments in DEPLOYMENT_URLS.  Example:
+3. Put the list of your sites in SITE_URLS.  Example:
 
 @@@
-DEPLOYMENT_URLS = {
+SITE_URLS = {
     'ci-server': 'http://buildbot.marcinkaszynski.com:1234',
     'devel': 'http://devel.marcinkaszynski.com:10001',
 }
 @@@
 
-4. Modify your mail-sending code to add deployment name to each
-   message you send using a unique argument named 'deployment'.  For
+4. Modify your mail-sending code to add site name to each
+   message you send using a unique argument named 'site'.  For
    details how to use unique arguments in general see:
 
    http://sendgrid.com/docs/API_Reference/SMTP_API/unique_arguments.html
@@ -28,7 +28,7 @@ DEPLOYMENT_URLS = {
    Look for x-smtpapi header/parameter.
 
 5. Start reposter.  It will receive messages from SendGrid and repost
-   to your deployments based on each event's unique_args.deployment.
+   to your sites based on each event's unique_args.site.
 
 """
 
@@ -83,7 +83,7 @@ class Uploader(object):
 class EventDispatcher(object):
     def __init__(self):
         self.uploaders = {}
-        for name, url in settings.DEPLOYMENT_URLS.items():
+        for name, url in settings.SITE_URLS.items():
             self.uploaders[name] = Uploader(name, url)
         logging.info("%d uploaders: %r", len(self.uploaders.keys()), self.uploaders.keys())
 
@@ -99,7 +99,7 @@ class EventDispatcher(object):
             uploader.run()
 
     def get_uploader_name(self, event):
-        return event.get('unique_args', {}).get('deployment', 'default')
+        return event.get('unique_args', {}).get('site', 'default')
 
 
 class EventHandler(Resource):
