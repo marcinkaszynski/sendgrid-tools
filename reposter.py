@@ -89,8 +89,11 @@ class EventDispatcher(object):
 
     def add_event(self, event):
         name = self.get_uploader_name(event)
-        logging.info("ADD_EVENT: %s %s -> uploader %s", event['event'], event['email'], name)
-        self.uploaders[name].append(event)
+        uploader = self.uploaders.get(name)
+        if uploader:
+            uploader.append(event)
+            return True
+        return False
     
     def dispatch(self):
         logging.info("DISPATCH: %s", [(name, len(uploader.queue))
@@ -99,7 +102,7 @@ class EventDispatcher(object):
             uploader.run()
 
     def get_uploader_name(self, event):
-        return event.get('unique_args', {}).get('site', 'default')
+        return event.get('site', 'default')
 
 
 class EventHandler(Resource):
@@ -110,8 +113,13 @@ class EventHandler(Resource):
         self.dispatcher = dispatcher
     
     def render_POST(self, request):
+        ignored_cnt = 0
         for event in json.loads(request.content.read()):
-            self.dispatcher.add_event(event)
+            if not self.dispatcher.add_event(event):
+                print event
+                ignored_cnt += 1
+        if ignored_cnt:
+            logging.info("Ignored %d events.", ignored_cnt)
         self.dispatcher.dispatch()
         return "OK"
 
